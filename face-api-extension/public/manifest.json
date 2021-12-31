@@ -1,8 +1,8 @@
 {
   "name": "Face API Extension",
-  "description": "Face API extended for extension use",
+  "description" : "The brilliant face-api exposed as an extension",
   "version": "1.0",
-  "manifest_version": "2",
+  "manifest_version": 2,
   "browser_action": {
     "default_popup": "index.html",
     "default_title": "FACE FUN"
@@ -11,5 +11,25 @@
     "16": "logo192.png",
     "48": "logo192.png",
     "128": "logo192.png"
-  } 
+  },
+  "background": {
+    "scripts": [
+      "./static/js/background.js"
+    ],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["./static/js/content.js"],
+      "all_frames": false,
+      "run_at": "document_end"
+    }
+  ],
+  "permissions": [
+    "activeTab"
+  ],
+  "optional_permissions": [
+    "<all_urls>"
+  ]
 }
