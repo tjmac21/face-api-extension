@@ -1,20 +1,33 @@
 import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { ChromeMessage, Sender } from "../types";
-import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
+import { Link, useHistory } from "react-router-dom";
+import { ChromeMessage, Sender, ToProp } from "../types";
+import { getCurrentTabUId, CurrentTabImages, getCurrentTabUrl } from "../chrome/utils";
+
+type Map = {
+    [key: string]: string
+}
+
+const FACE_PAGE_MAP: Map = {
+    "Detect Faces": "/face/face-detect",
+    "Get Face Landmarks": "/face/face-landmark-detect",
+    "Expression Recognition": "/face/expression-detect",
+    "Estimate Age & Gender": "/face/age-gender",
+}
 
 export const Home = () => {
     const [url, setUrl] = useState<string>('');
     const [responseFromContent, setResponseFromContent] = useState<string>('');
+    const [imgClass, setImgClass] = useState(new CurrentTabImages());
 
-    let {push} = useHistory();
+    let { push } = useHistory();
 
     /**
      * Get current URL
      */
     useEffect(() => {
-        getCurrentTabUrl((url) => {
+        getCurrentTabUrl((url: any) => {
             setUrl(url || 'undefined');
+            setImgClass(new CurrentTabImages(url));
         })
     }, []);
 
@@ -24,7 +37,23 @@ export const Home = () => {
             message: "Hello from React",
         }
 
-        getCurrentTabUId((id) => {
+        getCurrentTabUId((id: any) => {
+            id && chrome.tabs.sendMessage(
+                id,
+                message,
+                (responseFromContentScript) => {
+                    setResponseFromContent(responseFromContentScript);
+                });
+        });
+    };
+
+    const fetchImagesMessage = () => {
+        const message: ChromeMessage = {
+            from: Sender.React,
+            message: "fetch images",
+        }
+
+        getCurrentTabUId((id: any) => {
             id && chrome.tabs.sendMessage(
                 id,
                 message,
@@ -40,7 +69,7 @@ export const Home = () => {
             message: "delete logo",
         }
 
-        getCurrentTabUId((id) => {
+        getCurrentTabUId((id: any) => {
             id && chrome.tabs.sendMessage(
                 id,
                 message,
@@ -59,16 +88,23 @@ export const Home = () => {
                 <p>
                     {url}
                 </p>
-                <button onClick={sendTestMessage}>SEND MESSAGE</button>
+                {/* <button onClick={sendTestMessage}>SEND MESSAGE</button>
                 <button onClick={sendRemoveMessage}>Remove logo</button>
-                <p>Response from content:</p>
-                <p>
-                    {responseFromContent}
-                </p>
+                <button onClick={fetchImagesMessage}>Recognize faces</button>
+                <button onClick={fetchImagesMessage}>Detect Face Landmarks</button>
+                <button onClick={fetchImagesMessage}>Detect Expression</button>
+                <button onClick={fetchImagesMessage}>Estimate Age and Gender</button> */}
                 <button onClick={() => {
                     push('/about')
                 }}>About page
                 </button>
+                {Object.keys(FACE_PAGE_MAP).map(key => {
+                    const toProp = {
+                        pathname: FACE_PAGE_MAP[key],
+                        state: { imgClass: imgClass }
+                    } as ToProp;
+                    return <Link key={key} to={toProp} >{key}</Link>
+                })}
             </header>
         </div>
     )

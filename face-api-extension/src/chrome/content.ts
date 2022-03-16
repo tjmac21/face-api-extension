@@ -25,6 +25,18 @@ const messagesFromReactAppListener = (
         const logo = document.getElementById('hplogo');
         logo?.parentElement?.removeChild(logo)
     }
+
+    if (isValidated && message.message === "fetch images") {
+        const imgTags = document.getElementsByTagName('img');
+        if (!imgTags || imgTags.length === 0) {
+            response('');
+            return;
+        }
+        
+        // todo: get background images as well
+
+        response(Array.from(imgTags)?.map(el => el.src).toString());
+    }
 }
 
 const main = () => {

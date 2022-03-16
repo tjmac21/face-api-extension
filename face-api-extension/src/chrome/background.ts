@@ -1,3 +1,5 @@
+import * as faceapi from 'face-api.js';
+
 export {}
 /** Fired when the extension is first installed,
  *  when the extension is updated to a new version,
@@ -7,9 +9,17 @@ chrome.runtime.onInstalled.addListener((details) => {
     alert('[background.js] onInstalled');
 });
 
-chrome.runtime.onConnect.addListener((port) => {
+chrome.runtime.onConnect.addListener(async (port) => {
     console.log('[background.js] onConnect', port)
     alert('[background.js] onInstalled');
+    
+    // load models
+    const MODEL_URL = '/models' //model directory
+
+    await faceapi.loadSsdMobilenetv1Model(MODEL_URL) 
+    await faceapi.loadFaceLandmarkModel(MODEL_URL) // model to detect face landmark
+    await faceapi.loadFaceRecognitionModel(MODEL_URL) //model to Recognise Face
+    await faceapi.loadFaceExpressionModel(MODEL_URL) //model to detect face expression
 });
 
 chrome.runtime.onStartup.addListener(() => {
